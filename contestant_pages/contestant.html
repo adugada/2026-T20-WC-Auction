@@ -59,13 +59,19 @@
     document.getElementById('title').innerText = contestantName;
     document.getElementById('meta').innerText = '';
 
-    // Attempt to load JSON data from parent directory
-    const jsonPath = '../contestant_data.json';
+    // Determine correct path based on environment
+    let jsonPath = '../contestant_data.json';
+    
+    // For GitHub Pages, build the full path including the repo name
+    if(window.location.hostname.includes('github.io')) {
+      const baseUrl = window.location.pathname.split('/contestant_pages')[0];
+      jsonPath = baseUrl + '/contestant_data.json';
+    }
 
     function showMessage(msg){ const el=document.getElementById('msg'); el.style.display='block'; el.innerText=msg; }
 
     fetch(jsonPath).then(r=>{
-      if(!r.ok) throw new Error('Not found');
+      if(!r.ok) throw new Error('Not found at ' + jsonPath);
       return r.json();
     }).then(data=>{
       console.log('Available contestants:', Object.keys(data));
