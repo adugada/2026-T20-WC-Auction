@@ -184,6 +184,79 @@ td {
 
 tr:hover td { background-color: rgba(255,255,255,0.02); }
 
+/* --- Custom Dropdown Styles --- */
+.filter-container {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-button {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    background: linear-gradient(135deg, rgba(79,172,254,0.1), rgba(255,255,255,0.05));
+    color: var(--text-main);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    justify-content: space-between;
+}
+
+.filter-button:hover {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(79,172,254,0.2), rgba(255,255,255,0.08));
+}
+
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    margin-top: 8px;
+    min-width: 200px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+.filter-dropdown.active {
+    display: block;
+}
+
+.filter-option {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+}
+
+.filter-option:hover {
+    background: rgba(79,172,254,0.2);
+}
+
+.filter-option input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.filter-option label {
+    cursor: pointer;
+    flex: 1;
+    color: var(--text-main);
+}
+
 /* --- Search Input --- */
 #playerSearch { 
     width: 100%; padding: 12px 15px; 
@@ -509,7 +582,26 @@ tr:hover td { background-color: rgba(255,255,255,0.02); }
     <div id="players" class="page">
         <button class="back-btn" onclick="showPage('home')">Dashboard</button>
         <h2>Players Database (300)</h2>
-        <input type="text" id="playerSearch" onkeyup="filterPlayers()" placeholder="Search by name, country or role...">
+        <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <div class="filter-container">
+                <button class="filter-button" onclick="toggleDropdown('roleFilter')">
+                    <span>📍 <span id="roleLabel">Select Role(s)</span></span>
+                    <span style="font-size: 0.8rem;">▼</span>
+                </button>
+                <div id="roleFilter" class="filter-dropdown"></div>
+            </div>
+            
+            <div class="filter-container">
+                <button class="filter-button" onclick="toggleDropdown('countryFilter')">
+                    <span>🌍 <span id="countryLabel">Select Country(ies)</span></span>
+                    <span style="font-size: 0.8rem;">▼</span>
+                </button>
+                <div id="countryFilter" class="filter-dropdown"></div>
+            </div>
+            
+            <input type="text" id="nameFilter" placeholder="🔍 Search by name..." onkeyup="applyFilters()" style="padding: 10px 12px; border-radius: 6px; border: 2px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 0.9rem; flex: 1; min-width: 150px; transition: all 0.3s;">
+            <button onclick="resetFilters()" style="padding: 10px 18px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--accent), rgba(251,191,36,0.8)); color: #000; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(251,191,36,0.3);">Reset</button>
+        </div>
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -688,9 +780,71 @@ function showPage(pageId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function normalizeRole(role) {
+    // Remove (C), (vc), and other captain/vice-captain indicators
+    return role.replace(/\s*\([A-Za-z]*\)\s*/g, '').trim();
+}
+
+function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.classList.toggle('active');
+    // Close other dropdowns
+    document.querySelectorAll('.filter-dropdown').forEach(d => {
+        if(d.id !== dropdownId) d.classList.remove('active');
+    });
+}
+
+function closeDropdowns() {
+    document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('active'));
+}
+
+function initializeFilters() {
+    // Extract unique roles and countries from allPlayers, normalizing roles
+    const roles = [...new Set(allPlayers.map(p => normalizeRole(p.role)))].sort();
+    const countries = [...new Set(allPlayers.map(p => p.country))].sort();
+    
+    // Populate role dropdown
+    const roleFilter = document.getElementById('roleFilter');
+    roles.forEach(role => {
+        const option = document.createElement('div');
+        option.className = 'filter-option';
+        option.innerHTML = `
+            <input type="checkbox" id="role_${role}" value="${role}" onchange="applyFilters();updateLabel('role')">
+            <label for="role_${role}">${role}</label>
+        `;
+        roleFilter.appendChild(option);
+    });
+    
+    // Populate country dropdown
+    const countryFilter = document.getElementById('countryFilter');
+    countries.forEach(country => {
+        const option = document.createElement('div');
+        option.className = 'filter-option';
+        option.innerHTML = `
+            <input type="checkbox" id="country_${country}" value="${country}" onchange="applyFilters();updateLabel('country')">
+            <label for="country_${country}">${country}</label>
+        `;
+        countryFilter.appendChild(option);
+    });
+}
+
+function updateLabel(filterType) {
+    if(filterType === 'role') {
+        const selected = document.querySelectorAll('#roleFilter input:checked').length;
+        document.getElementById('roleLabel').textContent = selected > 0 ? `${selected} role(s)` : 'Select Role(s)';
+    } else if(filterType === 'country') {
+        const selected = document.querySelectorAll('#countryFilter input:checked').length;
+        document.getElementById('countryLabel').textContent = selected > 0 ? `${selected} country(ies)` : 'Select Country(ies)';
+    }
+}
+
 function populateTable() {
     const tbody = document.getElementById('playerTableBody');
     tbody.innerHTML = allPlayers.map(p => `<tr><td>${p.name}</td><td>${p.role}</td><td>${p.country}</td></tr>`).join('');
+    // Initialize filters after populating table
+    if (document.getElementById('roleFilter').children.length === 0) {
+        initializeFilters();
+    }
 }
 
 function populateSchedule() {
@@ -698,13 +852,41 @@ function populateSchedule() {
     tbody.innerHTML = tournamentSchedule.map(s => `<tr><td>${s.date}</td><td>${s.match}</td><td>${s.venue}</td><td>${s.time}</td></tr>`).join('');
 }
 
-function filterPlayers() {
-    let input = document.getElementById("playerSearch").value.toLowerCase();
-    let rows = document.querySelectorAll("#playerTableBody tr");
+function applyFilters() {
+    const selectedRoles = Array.from(document.querySelectorAll('#roleFilter input:checked')).map(o => o.value);
+    const selectedCountries = Array.from(document.querySelectorAll('#countryFilter input:checked')).map(o => o.value);
+    const nameInput = document.getElementById('nameFilter').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('#playerTableBody tr');
     rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+        const cells = row.querySelectorAll('td');
+        const name = cells[0].textContent.toLowerCase();
+        const role = normalizeRole(cells[1].textContent);
+        const country = cells[2].textContent;
+        
+        const matchesRole = selectedRoles.length === 0 || selectedRoles.includes(role);
+        const matchesCountry = selectedCountries.length === 0 || selectedCountries.includes(country);
+        const matchesName = nameInput === '' || name.includes(nameInput);
+        
+        row.style.display = (matchesRole && matchesCountry && matchesName) ? '' : 'none';
     });
 }
+
+function resetFilters() {
+    document.querySelectorAll('#roleFilter input:checked').forEach(cb => cb.checked = false);
+    document.querySelectorAll('#countryFilter input:checked').forEach(cb => cb.checked = false);
+    document.getElementById('nameFilter').value = '';
+    document.getElementById('roleLabel').textContent = 'Select Role(s)';
+    document.getElementById('countryLabel').textContent = 'Select Country(ies)';
+    applyFilters();
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.filter-container') && !event.target.closest('.filter-button')) {
+        closeDropdowns();
+    }
+});
 </script>
 
 </body>
