@@ -257,6 +257,14 @@ tr:hover td { background-color: rgba(255,255,255,0.02); }
     color: var(--text-main);
 }
 
+/* --- Table Analysis Column Styling --- */
+#playerTableBody td:last-child {
+    max-width: 400px;
+    word-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+}
+
 /* --- Search Input --- */
 #playerSearch { 
     width: 100%; padding: 12px 15px; 
@@ -598,6 +606,14 @@ tr:hover td { background-color: rgba(255,255,255,0.02); }
                 </button>
                 <div id="countryFilter" class="filter-dropdown"></div>
             </div>
+
+            <div class="filter-container">
+                <button class="filter-button" onclick="toggleDropdown('suggestionFilter')">
+                    <span>⭐ <span id="suggestionLabel">Select Suggestion(s)</span></span>
+                    <span style="font-size: 0.8rem;">▼</span>
+                </button>
+                <div id="suggestionFilter" class="filter-dropdown"></div>
+            </div>
             
             <input type="text" id="nameFilter" placeholder="🔍 Search by name..." onkeyup="applyFilters()" style="padding: 10px 12px; border-radius: 6px; border: 2px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 0.9rem; flex: 1; min-width: 150px; transition: all 0.3s;">
             <button onclick="resetFilters()" style="padding: 10px 18px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--accent), rgba(251,191,36,0.8)); color: #000; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(251,191,36,0.3);">Reset</button>
@@ -609,6 +625,9 @@ tr:hover td { background-color: rgba(255,255,255,0.02); }
                         <th>Name</th>
                         <th>Role</th>
                         <th>Country</th>
+                        <th>Suggestion</th>
+                        <th>Price Target</th>
+                        <th>Analysis</th>
                     </tr>
                 </thead>
                 <tbody id="playerTableBody">
@@ -798,10 +817,32 @@ function closeDropdowns() {
     document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('active'));
 }
 
+let playerSuggestions = {};
+let suggestionsLoaded = false;
+
+// Load suggestions from JSON
+const suggestionsPromise = fetch('player_suggestions.json')
+    .then(r => {
+        if (!r.ok) throw new Error('Failed to load player_suggestions.json');
+        return r.json();
+    })
+    .then(data => {
+        playerSuggestions = data;
+        suggestionsLoaded = true;
+        console.log('✅ Loaded player suggestions for ' + Object.keys(data).length + ' players');
+        return data;
+    })
+    .catch(err => {
+        console.error('❌ Could not load player_suggestions.json:', err);
+        suggestionsLoaded = true;
+        return {};
+    });
+
 function initializeFilters() {
-    // Extract unique roles and countries from allPlayers, normalizing roles
+    // Extract unique roles, countries, and suggestions from allPlayers
     const roles = [...new Set(allPlayers.map(p => normalizeRole(p.role)))].sort();
     const countries = [...new Set(allPlayers.map(p => p.country))].sort();
+    const suggestions = [...new Set(Object.values(playerSuggestions).map(s => s.suggestion).filter(s => s))].sort();
     
     // Populate role dropdown
     const roleFilter = document.getElementById('roleFilter');
@@ -826,6 +867,18 @@ function initializeFilters() {
         `;
         countryFilter.appendChild(option);
     });
+
+    // Populate suggestion dropdown
+    const suggestionFilter = document.getElementById('suggestionFilter');
+    suggestions.forEach(suggestion => {
+        const option = document.createElement('div');
+        option.className = 'filter-option';
+        option.innerHTML = `
+            <input type="checkbox" id="suggestion_${suggestion}" value="${suggestion}" onchange="applyFilters();updateLabel('suggestion')">
+            <label for="suggestion_${suggestion}">${suggestion}</label>
+        `;
+        suggestionFilter.appendChild(option);
+    });
 }
 
 function updateLabel(filterType) {
@@ -835,16 +888,29 @@ function updateLabel(filterType) {
     } else if(filterType === 'country') {
         const selected = document.querySelectorAll('#countryFilter input:checked').length;
         document.getElementById('countryLabel').textContent = selected > 0 ? `${selected} country(ies)` : 'Select Country(ies)';
+    } else if(filterType === 'suggestion') {
+        const selected = document.querySelectorAll('#suggestionFilter input:checked').length;
+        document.getElementById('suggestionLabel').textContent = selected > 0 ? `${selected} suggestion(s)` : 'Select Suggestion(s)';
     }
 }
 
 function populateTable() {
     const tbody = document.getElementById('playerTableBody');
-    tbody.innerHTML = allPlayers.map(p => `<tr><td>${p.name}</td><td>${p.role}</td><td>${p.country}</td></tr>`).join('');
-    // Initialize filters after populating table
-    if (document.getElementById('roleFilter').children.length === 0) {
-        initializeFilters();
-    }
+    
+    // Wait for suggestions to load, then populate
+    suggestionsPromise.then(() => {
+        const rows = allPlayers.map(p => {
+            const suggestion = playerSuggestions[p.name] || {};
+            return `<tr><td>${p.name}</td><td>${p.role}</td><td>${p.country}</td><td>${suggestion.suggestion || '—'}</td><td>${suggestion.price_target ? '$' + suggestion.price_target.toFixed(1) : '—'}</td><td>${suggestion.analysis || '—'}</td></tr>`;
+        });
+        
+        tbody.innerHTML = rows.join('');
+        
+        // Initialize filters after populating table
+        if (document.getElementById('roleFilter').children.length === 0) {
+            initializeFilters();
+        }
+    });
 }
 
 function populateSchedule() {
@@ -855,6 +921,7 @@ function populateSchedule() {
 function applyFilters() {
     const selectedRoles = Array.from(document.querySelectorAll('#roleFilter input:checked')).map(o => o.value);
     const selectedCountries = Array.from(document.querySelectorAll('#countryFilter input:checked')).map(o => o.value);
+    const selectedSuggestions = Array.from(document.querySelectorAll('#suggestionFilter input:checked')).map(o => o.value);
     const nameInput = document.getElementById('nameFilter').value.toLowerCase();
     
     const rows = document.querySelectorAll('#playerTableBody tr');
@@ -863,21 +930,25 @@ function applyFilters() {
         const name = cells[0].textContent.toLowerCase();
         const role = normalizeRole(cells[1].textContent);
         const country = cells[2].textContent;
+        const suggestion = cells[3].textContent.trim();
         
         const matchesRole = selectedRoles.length === 0 || selectedRoles.includes(role);
         const matchesCountry = selectedCountries.length === 0 || selectedCountries.includes(country);
+        const matchesSuggestion = selectedSuggestions.length === 0 || selectedSuggestions.includes(suggestion);
         const matchesName = nameInput === '' || name.includes(nameInput);
         
-        row.style.display = (matchesRole && matchesCountry && matchesName) ? '' : 'none';
+        row.style.display = (matchesRole && matchesCountry && matchesSuggestion && matchesName) ? '' : 'none';
     });
 }
 
 function resetFilters() {
     document.querySelectorAll('#roleFilter input:checked').forEach(cb => cb.checked = false);
     document.querySelectorAll('#countryFilter input:checked').forEach(cb => cb.checked = false);
+    document.querySelectorAll('#suggestionFilter input:checked').forEach(cb => cb.checked = false);
     document.getElementById('nameFilter').value = '';
     document.getElementById('roleLabel').textContent = 'Select Role(s)';
     document.getElementById('countryLabel').textContent = 'Select Country(ies)';
+    document.getElementById('suggestionLabel').textContent = 'Select Suggestion(s)';
     applyFilters();
 }
 
