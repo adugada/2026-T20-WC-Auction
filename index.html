@@ -936,6 +936,31 @@ function updateLabel(filterType) {
     }
 }
 
+// Dynamically extract Cricinfo links from Official Squads
+function buildCricinfURLMap() {
+    const urlMap = {};
+    const squadsSection = document.getElementById('squads');
+    if (squadsSection) {
+        // Find all links in the squads section
+        const links = squadsSection.querySelectorAll('a[href*="espncricinfo.com/cricketers"]');
+        links.forEach(link => {
+            // Get player name by removing (C) and (vc) suffixes
+            let playerName = link.textContent.trim();
+            playerName = playerName.replace(/\s*\([A-Za-z]*\)\s*/g, '').trim();
+            const url = link.href;
+            urlMap[playerName] = url;
+        });
+    }
+    return urlMap;
+}
+
+// Build the map when page loads
+let cricinfURLs = {};
+document.addEventListener('DOMContentLoaded', function() {
+    cricinfURLs = buildCricinfURLMap();
+    console.log('✅ Loaded Cricinfo URLs for ' + Object.keys(cricinfURLs).length + ' players');
+});
+
 function populateTable() {
     const tbody = document.getElementById('playerTableBody');
     
@@ -943,7 +968,10 @@ function populateTable() {
     suggestionsPromise.then(() => {
         const rows = allPlayers.map(p => {
             const suggestion = playerSuggestions[p.name] || {};
-            return `<tr><td>${p.name}</td><td>${p.role}</td><td>${p.country}</td><td>${suggestion.suggestion || '—'}</td><td>${suggestion.price_target ? '$' + suggestion.price_target.toFixed(1) : '—'}</td><td>${suggestion.analysis || '—'}</td></tr>`;
+            // Get Cricinfo URL from mapping, or use fallback
+            const cricinfUrl = cricinfURLs[p.name] || `https://www.espncricinfo.com/cricketers/${p.name.toLowerCase().replace(/\s+/g, '-')}`;
+            const playerLink = `<a href="${cricinfUrl}" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--primary)'">${p.name}</a>`;
+            return `<tr><td>${playerLink}</td><td>${p.role}</td><td>${p.country}</td><td>${suggestion.suggestion || '—'}</td><td>${suggestion.price_target ? '$' + suggestion.price_target.toFixed(1) : '—'}</td><td>${suggestion.analysis || '—'}</td></tr>`;
         });
         
         tbody.innerHTML = rows.join('');
