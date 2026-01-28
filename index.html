@@ -740,6 +740,12 @@ function populateTable() {
     
     // Wait for suggestions to load, then populate
     suggestionsPromise.then(() => {
+        const formatPrice = (value) => {
+            if (value === undefined || value === null || value === '') return '—';
+            const raw = String(value).replace(/₹/g, '').replace(/\bCr\b/gi, '').trim();
+            if (raw === '') return '—';
+            return `₹${raw} Cr`;
+        };
         const rows = allPlayers.map(p => {
             const suggestion = playerSuggestions[p.name] || {};
             // Get Cricinfo URL from mapping, or use fallback
@@ -748,7 +754,9 @@ function populateTable() {
             
             // Use rating and price from player-information if available, otherwise from suggestions
             const displayRating = p.rating || suggestion.suggestion || '—';
-            const displayPrice = p.priceTarget || (suggestion.price_target ? '₹' + suggestion.price_target.toFixed(1) : '—');
+            const displayPrice = p.priceTarget
+                ? formatPrice(p.priceTarget)
+                : (suggestion.price_target ? formatPrice(suggestion.price_target.toFixed(1)) : '—');
             const displayAnalysis = p.analysis || suggestion.analysis || '—';
             
             return `<tr><td>${playerLink}</td><td>${p.role}</td><td>${p.country}</td><td>${displayRating}</td><td>${displayPrice}</td><td>${displayAnalysis}</td></tr>`;
@@ -929,4 +937,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
