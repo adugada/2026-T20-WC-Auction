@@ -541,6 +541,9 @@ fetch('players_data_central.json')
     .then(data => {
         allPlayers = data;
         console.log('✅ Loaded ' + allPlayers.length + ' players from players_data_central.json');
+        // Build cricinfo URLs map after player data is loaded
+        cricinfURLs = buildCricinfURLMap();
+        console.log('✅ Loaded Cricinfo URLs for ' + Object.keys(cricinfURLs).length + ' players');
         // Populate the table after data is loaded
         populateTable();
     })
@@ -712,30 +715,22 @@ function updateLabel(filterType) {
     }
 }
 
-// Dynamically extract Cricinfo links from Official Squads
+// Build Cricinfo URLs map from loaded player data
 function buildCricinfURLMap() {
     const urlMap = {};
-    const squadsSection = document.getElementById('squads');
-    if (squadsSection) {
-        // Find all links in the squads section
-        const links = squadsSection.querySelectorAll('a[href*="espncricinfo.com/cricketers"]');
-        links.forEach(link => {
-            // Get player name by removing (C) and (vc) suffixes
-            let playerName = link.textContent.trim();
-            playerName = playerName.replace(/\s*\([A-Za-z]*\)\s*/g, '').trim();
-            const url = link.href;
-            urlMap[playerName] = url;
+    if (allPlayers && allPlayers.length > 0) {
+        allPlayers.forEach(player => {
+            if (player.espncricinfo) {
+                urlMap[player.name] = player.espncricinfo;
+            }
         });
     }
     return urlMap;
 }
 
-// Build the map when page loads
+// Build the map after player data is loaded
 let cricinfURLs = {};
-document.addEventListener('DOMContentLoaded', function() {
-    cricinfURLs = buildCricinfURLMap();
-    console.log('✅ Loaded Cricinfo URLs for ' + Object.keys(cricinfURLs).length + ' players');
-});
+// Note: This will be updated after allPlayers is loaded
 
 function populateTable() {
     const tbody = document.getElementById('playerTableBody');
