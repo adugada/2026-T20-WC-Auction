@@ -372,6 +372,8 @@ tr:hover td { background-color: rgba(255,255,255,0.02); }
                         <th>Country</th>
                         <th>Rating</th>
                         <th>Price Target</th>
+                        <th>Base Price</th>
+                        <th>Lot</th>
                         <th>Analysis</th>
                     </tr>
                 </thead>
@@ -758,8 +760,10 @@ function populateTable() {
                 ? formatPrice(p.priceTarget)
                 : (suggestion.price_target ? formatPrice(suggestion.price_target.toFixed(1)) : '—');
             const displayAnalysis = p.analysis || suggestion.analysis || '—';
+            const basePrice = p.basePrice || '—';
+            const lot = p.lot || '—';
             
-            return `<tr><td>${playerLink}</td><td>${p.role}</td><td>${p.country}</td><td>${displayRating}</td><td>${displayPrice}</td><td>${displayAnalysis}</td></tr>`;
+            return `<tr><td>${playerLink}</td><td>${p.role}</td><td>${p.country}</td><td>${displayRating}</td><td>${displayPrice}</td><td>${basePrice}</td><td>${lot}</td><td>${displayAnalysis}</td></tr>`;
         });
         
         tbody.innerHTML = rows.join('');
