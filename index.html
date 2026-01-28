@@ -703,7 +703,7 @@ tr:hover td { background-color: rgba(255,255,255,0.02); }
                 <a href="https://www.espncricinfo.com/cricketers/michael-bracewell-326968" target="_blank" class="player-name" style="text-decoration: none; display: block;">Michael Bracewell</a>
                 <a href="https://www.espncricinfo.com/cricketers/mark-chapman-438563" target="_blank" class="player-name" style="text-decoration: none; display: block;">Mark Chapman</a>
                 <a href="https://www.espncricinfo.com/cricketers/james-neesham-355269" target="_blank" class="player-name" style="text-decoration: none; display: block;">James Neesham</a>
-                <a href="https://www.espncricinfo.com/cricketers/adam-milne-450860" target="_blank" class="player-name" style="text-decoration: none; display: block;">Adam Milne</a>
+                <a href="https://www.espncricinfo.com/cricketers/adam-milne-450860" target="_blank" class="player-name" style="text-decoration: none; display: block;">Kyle Jamieson</a>
                 <a href="https://www.espncricinfo.com/cricketers/tim-seifert-625964" target="_blank" class="player-name" style="text-decoration: none; display: block;">Tim Seifert</a>
                 <a href="https://www.espncricinfo.com/cricketers/jacob-duffy-547766" target="_blank" class="player-name" style="text-decoration: none; display: block;">Jacob Duffy</a>
             </div>
@@ -1254,10 +1254,10 @@ const allPlayers = [
     { name: "Michael Bracewell", role: "All-rounder", country: "New Zealand", rating: "💎 Chhota Packet, Bada Dhamaka", priceTarget: "₹5.0", analysis: "\"The Beast\"; hits clean and bowls tight off-spin. Underrated." },
     { name: "Mark Chapman", role: "Batter", country: "New Zealand", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹2.5", analysis: "Solid middle-order player; plays spin well. Flies under the radar." },
     { name: "James Neesham", role: "All-rounder", country: "New Zealand", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹3.0", analysis: "T20 freelancer; can win a game, but consistency is enemy." },
-    { name: "Adam Milne", role: "Bowler", country: "New Zealand", rating: "❌ Na Baba Na", priceTarget: "₹1.0", analysis: "Fast but very injury-prone; risky backup pacer." },
+    { name: "Kyle Jamieson", role: "All-rounder", country: "New Zealand", rating: "❌ Na Baba Na", priceTarget: "₹1.0", analysis: "Fast but very injury-prone; risky backup pacer." },
     { name: "Tim Seifert", role: "WK", country: "New Zealand", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹2.5", analysis: "Cheeky player; loves the scoop. Good backup keeper." },
     { name: "Jacob Duffy", role: "Bowler", country: "New Zealand", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Domestic stalwart; squad filler internationally." },
-    { name: "Rashid Khan", role: "Bowler (C)", country: "Afghanistan", rating: "🚀 Kamaal, Lajawaab", priceTarget: "₹18.0", analysis: "MVP of T20; bats, fields, best spinner on planet. Home conditions." },
+    { name: "Rashid Khan", role: "All-rounder (C)", country: "Afghanistan", rating: "🚀 Kamaal, Lajawaab", priceTarget: "₹18.0", analysis: "MVP of T20; bats, fields, best spinner on planet. Home conditions." },
     { name: "Rahmanullah Gurbaz", role: "WK", country: "Afghanistan", rating: "⭐ Super Se Upar", priceTarget: "₹9.0", analysis: "Fire and ice (mostly fire); dangerous opener who attacks early." },
     { name: "Ibrahim Zadran", role: "Batter", country: "Afghanistan", rating: "⭐ Super Se Upar", priceTarget: "₹6.5", analysis: "The anchor; technically solid, prevents collapses." },
     { name: "Azmatullah Omarzai", role: "All-rounder", country: "Afghanistan", rating: "💎 Chhota Packet, Bada Dhamaka", priceTarget: "₹6.5", analysis: "Gem! Swings new ball, bats with power. Proper all-rounder." },
@@ -1272,17 +1272,17 @@ const allPlayers = [
     { name: "Darwish Rasooli", role: "Batter", country: "Afghanistan", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Not enough impact." },
     { name: "Mohammad Ishaq", role: "WK", country: "Afghanistan", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Keeper without the batting stats." },
     { name: "Abdullah Ahmadzai", role: "Bowler", country: "Afghanistan", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Standard seamer." },
-    { name: "Dilpreet Bajwa", role: "Batter (C)", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Hard-hitter, but inconsistent; pool is too deep." },
-    { name: "Nicholas Kirton", role: "Batter", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹2.0", analysis: "Lefty with class; impressive in World Cup. Worth a punt." },
+    { name: "Dilpreet Bajwa", role: "All-rounder (C)", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Hard-hitter, but inconsistent; pool is too deep." },
+    { name: "Nicholas Kirton", role: "All-rounder", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹2.0", analysis: "Lefty with class; impressive in World Cup. Worth a punt." },
     { name: "Saad Bin Zafar", role: "All-rounder", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹1.5", analysis: "Experienced; economical spinner but doesn't take many wickets." },
     { name: "Kaleem Sana", role: "Bowler", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹1.5", analysis: "Decent left-arm pacer; bench warmer here." },
     { name: "Harsh Thaker", role: "All-rounder", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹1.5", analysis: "Steady but lacks explosive power." },
     { name: "Shreyas Movva", role: "WK", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Average keeper-bat." },
-    { name: "Navneet Dhaliwal", role: "Batter", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹1.0", analysis: "Good opener for Canada; bench option." },
+    { name: "Navneet Dhaliwal", role: "All-rounder", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹1.0", analysis: "Good opener for Canada; bench option." },
     { name: "Ravinderpal Singh", role: "Batter", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Hitter but no consistency." },
     { name: "Dilon Heyliger", role: "Bowler", country: "Canada", rating: "🧩 Jugaad / Wildcard", priceTarget: "₹1.5", analysis: "Can hit long ball, bowl medium pace; bits and pieces." },
-    { name: "Ajayveer Hundal", role: "Batter", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Not auction ready." },
-    { name: "Ansh Patel", role: "Bowler", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Young spinner, too raw." },
+    { name: "Ajayveer Hundal", role: "All-rounder", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Not auction ready." },
+    { name: "Ansh Patel", role: "All-rounder", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Young spinner, too raw." },
     { name: "Jaskarandeep Buttar", role: "Bowler", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Backup pacer." },
     { name: "Kanwarpal Tathgur", role: "Batter", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Not enough exposure." },
     { name: "Shivam Sharma", role: "Bowler", country: "Canada", rating: "❌ Na Baba Na", priceTarget: "₹0.5", analysis: "Spinner without variations." },
